@@ -1,0 +1,28 @@
+{
+  "name": "tresv2",
+  "version": "1.0.0",
+  "description": "Token Distributor for Tres Project",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JDPolanco/TresV2.git"
+  },
+  "keywords": [
+    "solidity"
+  ],
+  "author": "Juan David Polanco <juandabiada@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JDPolanco/TresV2/issues"
+  },
+  "homepage": "https://github.com/JDPolanco/TresV2#readme",
+  "devDependencies": {
+    "@openzeppelin/contracts": "^4.7.3"
+  }
+}
