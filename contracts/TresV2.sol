@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol"; 
 import "@openzeppelin/contracts/security/Pausable.sol";
 
-contract RedEnvelopeV2 is SignatureVerifier, Ownable, ReentrancyGuard, Pausable {
+contract TresV2 is SignatureVerifier, Ownable, ReentrancyGuard, Pausable {
   
   struct Envelopes {
     uint128 envelopeId;

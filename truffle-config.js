@@ -97,7 +97,8 @@ module.exports = {
           privateKeys.split(','), // array of private keys
           `https://data-seed-prebsc-1-s1.binance.org:8545/` // Url to Bnb node
           )
-      }
+      },
+      network_id: 97,
     }
   },
   api_keys: {

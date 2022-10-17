@@ -7,7 +7,9 @@
     "test": "test"
   },
   "scripts": {
-    "test": "truffle test"
+    "test": "truffle test",
+    "truffle-verify": "truffle run verify TresV2 --network bnb",
+    "truffle-migrate": "truffle migrate --reset --network bnb"
   },
   "repository": {
     "type": "git",
@@ -26,5 +28,8 @@
     "@openzeppelin/contracts": "^4.7.3",
     "@truffle/hdwallet-provider": "^2.1.0",
     "dotenv": "^16.0.3"
+  },
+  "dependencies": {
+    "truffle-plugin-verify": "^0.5.31"
   }
 }
