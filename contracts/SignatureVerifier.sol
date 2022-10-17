@@ -1,57 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-
 import "@openzeppelin/contracts/utils/Strings.sol";
-
-/* Signature Verification
-
-How to Sign and Verify
-# Signing
-1. Create message to sign
-2. Hash the message
-3. Sign the hash (off chain, keep your private key secret)
-
-# Verify
-1. Recreate hash from the original message
-2. Recover signer from signature and hash
-3. Compare recovered signer to claimed signer
-*/
 
 contract SignatureVerifier {
 
 	using Strings for uint;
-    /* 1. Unlock MetaMask account
-    ethereum.enable()
-    */
-    /* 2. envelopeId to Sign
-    getMessageHash(
-        "coffee and donuts"
-    )
 
-    hash = "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd"
-    */
+    /// @dev used in createEnvelop and claim functions of TresV2 contract
+    /// @param envelopeId numeric envelope id
+    /// @param claimCounter current number of claims
+    /// @return hashedMessage hashed message of arguments combination
     function getMessageHash(
         uint envelopeId,
-		    uint claimCounter
+		uint claimCounter
     ) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(envelopeId.toString(),claimCounter.toString()));
     }
 
-    /* 3. Sign message hash
-    # using browser
-    account = "0x9b17C9E2AA27F93b1d0e71b872069e096cB41233"
-    ethereum.request({ method: "personal_sign", params: [account, hash]}).then(console.log)
-
-	account = "0x9b17C9E2AA27F93b1d0e71b872069e096cB41233"
-	ethereum.request({ method: "personal_sign", params: [account, "0x7492ec2d2a314c2197aa9dc147aa9d581e6ac12c229007c2c394591dac0b4976"]}).then(console.log)
-
-    # using web3
-    web3.personal.sign(hash, web3.eth.defaultAccount, console.log)
-
-    Signature will be different for different accounts
-    0x993dab3dd91f5c6dc28e17439be475478f5635c92a56e17e82349d3fb2f166196f466c0b4e0c146f285204f0dcb13e5ae67bc33f4b888ec32dfe0a063e8f3f781b
-    */
+    /// @dev used in verify function
+    /// @param _messageHash message hash obtained from getMessageHash function
     function getEthSignedMessageHash(bytes32 _messageHash)
         public
         pure
@@ -67,12 +35,12 @@ contract SignatureVerifier {
             );
     }
 
-    /* 4. Verify signature
-    signer = 0xB273216C05A8c0D4F0a4Dd0d7Bae1D2EfFE636dd
-    message = "coffee and donuts"
-    signature =
-        0x993dab3dd91f5c6dc28e17439be475478f5635c92a56e17e82349d3fb2f166196f466c0b4e0c146f285204f0dcb13e5ae67bc33f4b888ec32dfe0a063e8f3f781b
-    */
+    /// @dev used in claim function of TresV2 contract
+    /// @param _signer for TresV2 it will always be the owner of TresV2 contract
+    /// @param _envelopeId numeric envelope id
+    /// @param claimCounter current number of claims
+    /// @param signature signature of message from TresV2 server privateKey
+    /// @return valid states if signature is valid or not
     function verify(
         address _signer,
         uint _envelopeId,
@@ -84,6 +52,10 @@ contract SignatureVerifier {
         return recoverSigner(ethSignedMessageHash, signature) == _signer;
     }
 
+     /// @dev used in verify function
+    /// @param _ethSignedMessageHash for TresV2 it will always be the owner of TresV2 contract
+    /// @param _signature numeric envelope id
+    /// @return signer signer of message
     function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature)
         public
         pure
@@ -94,6 +66,7 @@ contract SignatureVerifier {
         return ecrecover(_ethSignedMessageHash, v, r, s);
     }
 
+    /// @dev returns paramets that allow to retrieve the signer of the message. Used in recoverSigner function
     function splitSignature(bytes memory sig)
         public
         pure

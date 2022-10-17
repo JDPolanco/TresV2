@@ -6,6 +6,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol"; 
 import "@openzeppelin/contracts/security/Pausable.sol";
 
+/// @title A distributor of tokens
+/// @author Juan David Polanco
+/// @notice You can use this contract to distribute tokens to a maximum of 3 people per envelope
+/// @custom:experimental This is an experimental contract.
 contract TresV2 is SignatureVerifier, Ownable, ReentrancyGuard, Pausable {
   
   struct Envelopes {
@@ -23,7 +27,7 @@ contract TresV2 is SignatureVerifier, Ownable, ReentrancyGuard, Pausable {
   event Claimed(uint128 envelopeId, address claimer, uint timeStamp, uint distributedTokens, bytes32 hashedMessage);
   event CreatorWithdrawn(uint128 envelopeId, uint timeStamp);
 	constructor ()
-    
+    Ownable()
 	{
 	}
 
@@ -41,28 +45,24 @@ contract TresV2 is SignatureVerifier, Ownable, ReentrancyGuard, Pausable {
     uint128 _envelopeId = envelopeCounter;
     envelopeCounter++;
     bytes32 _hashedMessage = getMessageHash(_envelopeId, 0);
-    envelope[_envelopeId] = Envelopes(
-      _envelopeId,
-      msg.value,
-      0,
-      msg.sender,
-      new address[](3)
-    );
+    Envelopes memory _envelope = envelope[_envelopeId];
+    _envelope.envelopeId = _envelopeId;
+    _envelope.initialTokenAmount = msg.value;
+    _envelope.creator = msg.sender;
+    envelope[_envelopeId] = _envelope;
     emit EnvelopeCreated(_envelopeId, msg.sender,block.timestamp, msg.value, _hashedMessage, _creatorNickName);
 	}
 
   /// @notice Open envelope before others and get crypto gift!
   /// @param _envelopeId id of envelope to be opened
   /// @dev contract distributes crypto to msg.sender
-  function claim(uint128 _envelopeId, bytes memory _signature) external nonReentrant whenNotPaused
-{
+  function claim(uint128 _envelopeId, bytes memory _signature) external nonReentrant whenNotPaused {
     Envelopes memory _envelope = envelope[_envelopeId];
     uint _currentParticipant = _envelope.participants.length;
     require(verify(owner(),_envelopeId,_currentParticipant,_signature), "Incorrect Signature");
     require(3 >  _currentParticipant, "max participants exceeded");
     require(_envelope.claimedTokenAmount < _envelope.initialTokenAmount, "tokens already distributed");
     require(!_alreadyClaimed(msg.sender, _envelope.participants), "You already claimed");
-    _envelope.participants[_currentParticipant] = msg.sender;
     
     uint _amountToDeliver;
     // If it is the last possible participant it shares the remaining crypto. Otherwise it shares a random amount of crypto
@@ -73,6 +73,7 @@ contract TresV2 is SignatureVerifier, Ownable, ReentrancyGuard, Pausable {
     }
     _envelope.claimedTokenAmount += _amountToDeliver;
     envelope[_envelopeId] = _envelope;
+    envelope[_envelopeId].participants.push(msg.sender);
     (bool sent, ) = payable(msg.sender).call{value: _amountToDeliver}("");
     require(sent, "Failed to send Ether");
     bytes32 _newhashedMessage = getMessageHash(_envelopeId, _envelope.participants.length);
@@ -81,8 +82,8 @@ contract TresV2 is SignatureVerifier, Ownable, ReentrancyGuard, Pausable {
 
   /// @notice Claim your crypto locked in contract
   /// @param _envelopeId id of envelope in bytes256
-  /** @dev In case it's been more than 24 hours and participants have not claimed all possible crypto,
-           the envelope creator can claim crypto locked in this contract**/
+  /** @dev In case participants have not claimed all possible crypto,
+           the envelope creator can claim crypto locked in this contract envelope**/
   function creatorWithdraw(uint128 _envelopeId) external {
     Envelopes memory _envelope = envelope[_envelopeId];
     require(_envelope.claimedTokenAmount < _envelope.initialTokenAmount, "tokens already distributed");
@@ -107,6 +108,10 @@ contract TresV2 is SignatureVerifier, Ownable, ReentrancyGuard, Pausable {
     _amountToDeliver = (uint(keccak256(abi.encodePacked(_participantsCounter,block.timestamp))) % _tokenAmount) + 1;
   }
 
+  /// @dev used in claim function
+  /// @param user user trying to open the envelope
+  /// @param _claimedUsers array with addresses of users who have claimed gifts in this envelope
+  /// @return _haveClaimed amount of crypto to be deliver to claimer. It is random number between 1 and _tokenAmount
   function _alreadyClaimed(address user, address[] memory _claimedUsers) internal pure returns(bool _haveClaimed){
     for(uint8 i = 0; i < _claimedUsers.length; i = unsafe_inc(i)) {
       if(_claimedUsers[i] == user){
@@ -128,6 +133,7 @@ contract TresV2 is SignatureVerifier, Ownable, ReentrancyGuard, Pausable {
   *                                                       *
   ********************************************************/
   
+  /// @dev to be used in case of emergency to withdraw all crypto stored in this contract
   function adminWithdraw() external onlyOwner whenPaused {
     (bool sent, ) = payable(msg.sender).call{value: address(this).balance}("");
     require(sent, "Failed to send Ether");
@@ -139,15 +145,18 @@ contract TresV2 is SignatureVerifier, Ownable, ReentrancyGuard, Pausable {
   *                                                       *
   ********************************************************/
 
-  function getEnvelope(uint128 _envelopeId) external view returns(Envelopes memory) {
-    return envelope[_envelopeId];
+  /// @param _envelopeId numeric envelope Id
+  /// @return _envelope information related to envelope
+  function getEnvelope(uint128 _envelopeId) external view returns(Envelopes memory _envelope) {
+    _envelope = envelope[_envelopeId];
   }
 
 	/********************************************************
   *                                                       *
-  *                 RECEIVE FUNCTIONS                     *
+  *                  RECEIVE FUNCTIONS                    *
   *                                                       *
   ********************************************************/
 
+  /// @dev this function allows this contract to receive native tokens
   receive() external payable {  }
   }

@@ -2,8 +2,9 @@ require('dotenv').config();
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 const privateKeys = process.env.PRIVATE_KEYS || "";
-const mnemonic = process.env.MNEMONIC || ""
 const infuraProjectId = process.env.INFURA_PROJECT_ID
+const apiKeyScan = process.env.API_KEY
+
 module.exports = {
   plugins: ['truffle-plugin-verify'],
   networks: {
@@ -101,13 +102,6 @@ module.exports = {
       network_id: 97,
     }
   },
-  api_keys: {
-    // etherscan: "2IWVY2824WC7VZ56UXH49FSPK5PPPZC7IG" // mumbai
-    etherscan: "6888TJRWBGYKFE8N16Q4BZZM2M1URVWM4F"// bnb 
-    // etherscan: "AJ45C6F74SJ2P3EMW61V3DD1CJAJC3HTJK" // ethereum
-    // etherscan: "PMPIGW8S5JCZU92W8IADFPI1BNMEP5UBFT" // Rinkeby
-    // etherscan: "4UGX9RKT7G9GVBBMFW5ZMQNJMGECAXVII4" // Celo
-  },
   // Configure your compilers
   compilers: {
     solc: {
@@ -117,5 +111,12 @@ module.exports = {
       },
       version: "0.8.9" 
     }
+  },
+  api_keys: {
+    // etherscan: "2IWVY2824WC7VZ56UXH49FSPK5PPPZC7IG" // mumbai
+    bscscan: "Y8NSD2PV8IYBAER6A46J61UPMFMDP3TGKR"// bnb 
+    // etherscan: "AJ45C6F74SJ2P3EMW61V3DD1CJAJC3HTJK" // ethereum
+    // etherscan: "PMPIGW8S5JCZU92W8IADFPI1BNMEP5UBFT" // Rinkeby
+    // etherscan: "4UGX9RKT7G9GVBBMFW5ZMQNJMGECAXVII4" // Celo
   }
 };
