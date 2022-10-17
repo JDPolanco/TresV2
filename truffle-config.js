@@ -39,14 +39,6 @@ module.exports = {
     },
     mumbai: {
       networkCheckTimeout: 30000000000,
-      /*provider: function() {
-        return new HDWalletProvider( {
-          mnemonic: mnemonic, // array of private keys
-          providerOrUrl: `https://polygontestapi.terminet.io/rpc`, // Url to Polygon node,
-          pollingInterval: 30000000000
-        }
-          )
-      } ,*/
       provider: function() {
         return new HDWalletProvider(
           privateKeys.split(','), // array of private keys
@@ -98,28 +90,31 @@ module.exports = {
           )
       },
       network_id: 4
+    },
+    bnb: {
+      provider: function() {
+        return new HDWalletProvider(
+          privateKeys.split(','), // array of private keys
+          `https://data-seed-prebsc-1-s1.binance.org:8545/` // Url to Bnb node
+          )
+      }
     }
   },
   api_keys: {
     // etherscan: "2IWVY2824WC7VZ56UXH49FSPK5PPPZC7IG" // mumbai
-    // etherscan: "6888TJRWBGYKFE8N16Q4BZZM2M1URVWM4F"// bnb 
-    etherscan: "AJ45C6F74SJ2P3EMW61V3DD1CJAJC3HTJK" // ethereum
+    etherscan: "6888TJRWBGYKFE8N16Q4BZZM2M1URVWM4F"// bnb 
+    // etherscan: "AJ45C6F74SJ2P3EMW61V3DD1CJAJC3HTJK" // ethereum
+    // etherscan: "PMPIGW8S5JCZU92W8IADFPI1BNMEP5UBFT" // Rinkeby
+    // etherscan: "4UGX9RKT7G9GVBBMFW5ZMQNJMGECAXVII4" // Celo
   },
-  contracts_directory: './src/contracts/',
-  contracts_build_directory: './src/abis/',
   // Configure your compilers
   compilers: {
     solc: {
       optimizer: {
-        enabled: true,
+        enabled: false,
         runs: 200
       },
       version: "0.8.9" 
     }
-  },
-  api_keys: {
-    etherscan: "PMPIGW8S5JCZU92W8IADFPI1BNMEP5UBFT" // Rinkeby
-    // etherscan: "4UGX9RKT7G9GVBBMFW5ZMQNJMGECAXVII4" // Celo
-
   }
 };
